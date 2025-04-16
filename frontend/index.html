@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkinScan</title>
-    <link rel="stylesheet" href="styles/chatbot.css"> <!-- Link to chatbot styles -->
+    <title>DermaScan - Skin Disease Prediction</title>
     <style>
         :root {
             --primary: #4285F4;
@@ -231,7 +230,7 @@
         
         .result-accuracy {
             font-size: 14px;
-            color: var (--secondary);
+            color: var(--secondary);
             font-weight: 500;
         }
         
@@ -446,10 +445,14 @@
         }
         
         /* Chatbot Styles */
-        .chatbot-toggle {
+        .chatbot-container {
             position: fixed;
-            bottom: 30px;
-            right: 30px;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .chatbot-toggle {
             width: 60px;
             height: 60px;
             background-color: var(--primary);
@@ -460,8 +463,8 @@
             color: white;
             box-shadow: 0 4px 15px rgba(66, 133, 244, 0.4);
             cursor: pointer;
-            z-index: 999;
             transition: all 0.3s;
+            margin-left: auto;
         }
         
         .chatbot-toggle:hover {
@@ -469,20 +472,13 @@
             transform: scale(1.05);
         }
         
-        .chatbot-toggle i {
-            font-size: 24px;
-        }
-        
         .chatbot-widget {
-            position: fixed;
-            bottom: 100px;
-            right: 30px;
             width: 350px;
             height: 500px;
             background-color: white;
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            z-index: 999;
+            margin-bottom: 20px;
             display: none;
             flex-direction: column;
             overflow: hidden;
@@ -519,31 +515,38 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
+            background-color: #F8F9FA;
         }
         
         .message {
             max-width: 80%;
-            padding: 10px 15px;
-            border-radius: 15px;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.4;
+            position: relative;
         }
         
         .bot-message {
-            background-color: var(--light);
+            background-color: white;
+            color: var(--dark);
             align-self: flex-start;
-            border-bottom-left-radius: 5px;
+            border-bottom-left-radius: 4px;
         }
         
         .user-message {
             background-color: var(--primary);
             color: white;
             align-self: flex-end;
-            border-bottom-right-radius: 5px;
+            border-bottom-right-radius: 4px;
         }
         
         .chatbot-input {
-            padding: 15px;
+            padding: 12px 15px;
+            background-color: white;
             border-top: 1px solid var(--light-gray);
             display: flex;
+            align-items: center;
             gap: 10px;
         }
         
@@ -551,127 +554,117 @@
             flex: 1;
             padding: 10px 15px;
             border: 1px solid var(--light-gray);
-            border-radius: 20px;
+            border-radius: 24px;
             font-size: 14px;
         }
         
-        .chatbot-input input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-        
-        .send-btn {
+        .chatbot-input button {
             background-color: var(--primary);
             color: white;
             border: none;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 38px;
+            height: 38px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.3s;
         }
         
-        .send-btn:hover {
-            background-color: var(--primary-dark);
+        /* Add these styles to your existing chatbot CSS */
+        .quick-replies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 10px 0;
         }
         
-        .typing-indicator {
+        .quick-reply {
+            background-color: rgba(66, 133, 244, 0.1);
+            color: #4285F4;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .quick-reply:hover {
+            background-color: rgba(66, 133, 244, 0.2);
+        }
+        
+        .message {
+            background-color: white;
+            border-radius: 15px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .bot-message {
+            background-color: white;
+        }
+        
+        .user-message {
+            background-color: #4285F4;
+            color: white;
+            align-self: flex-end;
+        }
+        
+        .message-time {
+            font-size: 12px;
+            color: #5F6368;
+            margin-top: 4px;
+            text-align: right;
+        }
+        
+        .bot-avatar {
+            width: 40px;
+            height: 40px;
+            background-color: #4285F4;
+            border-radius: 50%;
             display: flex;
             align-items: center;
-            gap: 5px;
-            padding: 10px 15px;
-            background-color: var(--light);
-            border-radius: 15px;
-            width: fit-content;
-            margin-top: 5px;
-            display: none;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 10px;
         }
         
-        .typing-dot {
-            width: 8px;
-            height: 8px;
-            background-color: var(--gray);
-            border-radius: 50%;
-            animation: typing 1s infinite ease-in-out;
-        }
-        
-        .typing-dot:nth-child(1) {
-            animation-delay: 0s;
-        }
-        
-        .typing-dot:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-        
-        .typing-dot:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-        
-        @keyframes typing {
-            0% {
-                transform: scale(1);
-                opacity: 0.5;
-            }
-            50% {
-                transform: scale(1.2);
-                opacity: 1;
-            }
-            100% {
-                transform: scale(1);
-                opacity: 0.5;
-            }
-        }
-        
-        /* Chatbot Section */
-        .chatbot-section {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            margin-bottom: 60px;
-            text-align: center;
-        }
-        
-        .chatbot-features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 30px;
-            margin-top: 40px;
-        }
-        
-        .feature-card {
-            padding: 20px;
-            border-radius: 8px;
-            background-color: var(--light);
-            text-align: center;
-            transition: all 0.3s;
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        }
-        
-        .feature-icon {
-            font-size: 40px;
-            color: var(--primary);
-            margin-bottom: 15px;
-        }
-        
-        .feature-title {
-            font-size: 18px;
-            font-weight: 600;
+        .message-with-avatar {
+            display: flex;
+            align-items: flex-start;
             margin-bottom: 10px;
-            color: var(--dark);
         }
         
-        .feature-description {
+        /* Add these to your existing chatbot styles */
+        .message-content {
+            line-height: 1.5;
             font-size: 14px;
-            color: var(--gray);
-            line-height: 1.6;
+        }
+        
+        .section-title {
+            font-weight: bold;
+            color: #4285F4;
+            display: inline-block;
+            margin-bottom: 5px;
+        }
+        
+        .highlight {
+            font-weight: bold;
+            color: #34A853;
+        }
+        
+        .bot-message {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        /* Adjust spacing for bullet points */
+        .message-content br {
+            display: block;
+            margin: 5px 0;
         }
     </style>
 </head>
@@ -687,6 +680,7 @@
                 <div class="nav-links">
                     <a href="#home">Home</a>
                     <a href="#prediction">Skin Analysis</a>
+                    <a href="#chatbot">AI Assistant</a>
                     <a href="#appointment">Appointments</a>
                     <a href="#about">About Us</a>
                 </div>
@@ -769,6 +763,43 @@
                 </div>
             </section>
             
+            <!-- Chatbot Section -->
+            <section id="chatbot" class="chatbot-section">
+                <h2 class="section-title">DermaScan AI Assistant</h2>
+                <p style="margin-bottom: 30px; text-align: center; color: var(--gray); max-width: 700px; margin-left: auto; margin-right: auto;">
+                    Get instant answers to your skin health questions, preliminary assessments, and personalized skincare advice from our AI-powered virtual assistant.
+                </p>
+                
+                <div class="chatbot-features">
+                    <div class="feature-card">
+                        <div class="feature-icon">💬</div>
+                        <h3 class="feature-title">24/7 Support</h3>
+                        <p class="feature-description">Get answers to your dermatology questions anytime, day or night.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">🔍</div>
+                        <h3 class="feature-title">Preliminary Assessment</h3>
+                        <p class="feature-description">Describe your symptoms and get initial guidance on possible conditions.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">📝</div>
+                        <h3 class="feature-title">Care Instructions</h3>
+                        <p class="feature-description">Receive personalized advice for managing common skin conditions.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">🔔</div>
+                        <h3 class="feature-title">Appointment Assistance</h3>
+                        <p class="feature-description">Get help scheduling appointments with dermatology specialists.</p>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 40px;">
+                    <button class="btn btn-primary" id="open-chatbot-btn">Chat with DermAssist AI</button>
+                </div>
+            </section>
             
             <!-- Appointment Section -->
             <section id="appointment">
@@ -846,7 +877,42 @@
         </div>
     </main>
 
-    <!-- Include Chatbot -->
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>DermaScan</h3>
+                    <p style="color: var(--light-gray); line-height: 1.6;">
+                        Advanced AI-powered skin disease detection and dermatology consultation platform.
+                    </p>
+                </div>
+        
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#prediction">Skin Analysis</a></li>
+                        <li><a href="#chatbot">AI Assistant</a></li>
+                        <li><a href="#appointment">Appointments</a></li>
+                        <li><a href="#about">About Us</a></li>
+                    </ul>
+                </div>
+        
+                <div class="footer-column">
+                    <h3>Services</h3>
+                    <ul>
+                        <li><a href="#">Skin Disease Detection</a></li>
+                        <li><a href="#">Dermatologist Consultation</a></li>
+                        <li><a href="#">Treatment Plans</a></li>
+                        <li><a href="#">Follow-up Care</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Chatbot Container -->
     <div class="chatbot-container">
         <div class="chatbot-widget" id="chatbot-widget">
             <div class="chatbot-header">
@@ -862,77 +928,233 @@
                     <button class="action-btn close-btn">×</button>
                 </div>
             </div>
+            
             <div class="chatbot-messages" id="chatbot-messages">
-                <!-- Chatbot messages will appear here -->
+                <div class="message-with-avatar">
+                    <div class="bot-avatar">D</div>
+                    <div class="bot-message message">
+                        <div class="message-content">
+                            Here's a simple guide for acne treatment options:<br><br>
+                            
+                            <span class="section-title">🏠 Over-The-Counter Solutions:</span><br>
+                            • Gentle cleansers with <span class="highlight">salicylic acid</span><br>
+                            • Spot treatments with <span class="highlight">benzoyl peroxide</span><br>
+                            • Basic <span class="highlight">retinoids</span> (Adapalene)<br><br>
+                            
+                            <span class="section-title">👨‍⚕️ Prescription Treatments:</span><br>
+                            • Stronger topical medications<br>
+                            • Oral antibiotics<br>
+                            • Advanced retinoids<br>
+                            • Hormonal therapy<br><br>
+                            
+                            <span class="section-title">⚡ Quick Tips:</span><br>
+                            • Be patient - results take time<br>
+                            • Stay consistent with treatment<br>
+                            • Avoid touching your face<br>
+                            • Keep hair clean and away from face<br><br>
+                            
+                            <span class="section-title">🔍 When to See a Doctor:</span><br>
+                            • Severe or painful acne<br>
+                            • No improvement with OTC products<br>
+                            • Concerns about scarring
+                        </div>
+                        <div class="message-time">10:32 AM</div>
+                    </div>
+                </div>
+                
+                <!-- Quick Reply Buttons -->
+                <div class="quick-replies">
+                    <button class="quick-reply">OTC treatments</button>
+                    <button class="quick-reply">Prescription options</button>
+                    <button class="quick-reply">Prevention tips</button>
+                    <button class="quick-reply">Book consultation</button>
+                </div>
             </div>
+            
             <div class="chatbot-input">
                 <button class="attachment-btn">📎</button>
                 <input type="text" placeholder="Type your message..." id="message-input">
                 <button id="send-btn">➤</button>
             </div>
         </div>
+        
         <div class="chatbot-toggle" id="chatbot-toggle">
             <i>💬</i>
         </div>
     </div>
 
-    <script src="scripts/chatbot.js"></script> <!-- Link to chatbot script -->
-    <script src="scripts/chatbot.js"></script>
+    <!-- Add Chatbot JavaScript -->
     <script>
         // DOM Elements
         const chatbotToggle = document.getElementById('chatbot-toggle');
         const chatbotWidget = document.getElementById('chatbot-widget');
         const minimizeBtn = document.querySelector('.minimize-btn');
         const closeBtn = document.querySelector('.close-btn');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const chatbotMessages = document.getElementById('chatbot-messages');
 
         // Toggle chatbot visibility
         chatbotToggle.addEventListener('click', () => {
-            chatbotWidget.style.display = 'flex'; // Show the chatbot
-            chatbotToggle.style.display = 'none'; // Hide the toggle button
+            chatbotWidget.style.display = chatbotWidget.style.display === 'none' || chatbotWidget.style.display === '' ? 'flex' : 'none';
+            chatbotToggle.style.display = chatbotWidget.style.display === 'flex' ? 'none' : 'flex';
         });
 
         // Minimize chatbot
         minimizeBtn.addEventListener('click', () => {
-            chatbotWidget.style.display = 'none'; // Hide the chatbot
-            chatbotToggle.style.display = 'flex'; // Show the toggle button
+            chatbotWidget.style.display = 'none';
+            chatbotToggle.style.display = 'flex';
         });
 
         // Close chatbot
         closeBtn.addEventListener('click', () => {
-            chatbotWidget.style.display = 'none'; // Hide the chatbot
-            chatbotToggle.style.display = 'flex'; // Show the toggle button
+            chatbotWidget.style.display = 'none';
+            chatbotToggle.style.display = 'flex';
         });
-    </script>
 
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-column">
-                    <h3>DermaScan</h3>
-                    <p style="color: var(--light-gray); line-height: 1.6;">Advanced AI-powered skin disease detection and dermatology consultation platform.</p>
-                </div>
+        // Send message function
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (message === '') return;
+            
+            const currentTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            // Add user message
+            const userMessageElement = document.createElement('div');
+            userMessageElement.className = 'user-message message';
+            userMessageElement.innerHTML = `
+                <div>${message}</div>
+                <div class="message-time">${currentTime}</div>
+            `;
+            
+            chatbotMessages.appendChild(userMessageElement);
+            messageInput.value = '';
+            
+            try {
+                // Send message to backend
+                const response = await fetch('http://localhost:5000/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message })
+                });
                 
-                <div class="footer-column">
-                    <h3>Quick Links</h3>
-                    <ul>
-                        <li><a href="#home">Home</a></li>
-                        <li><a href="#prediction">Skin Analysis</a></li>
-                        <li><a href="#chatbot">AI Assistant</a></li>
-                        <li><a href="#appointment">Appointments</a></li>
-                        <li><a href="#about">About Us</a></li>
-                    </ul>
-                </div>
+                const data = await response.json();
                 
-                <div class="footer-column">
-                    <h3>Services</h3>
-                    <ul>
-                        <li><a href="#">Skin Disease Detection</a></li>
-                        <li><a href="#">Dermatologist Consultation</a></li>
-                        <li><a href="#">Treatment Plans</a></li>
-                        <li><a href="#">Follow-up Care</a></li>
-                    </ul>
-                </div>
+                // Add bot response
+                const botMessageWrapper = document.createElement('div');
+                botMessageWrapper.className = 'message-with-avatar';
+                botMessageWrapper.innerHTML = `
+                    <div class="bot-avatar">D</div>
+                    <div class="bot-message message">
+                        <div class="message-content">
+                            ${data.response}
+                        </div>
+                        <div class="message-time">${currentTime}</div>
+                    </div>
+                `;
                 
-                <div class="footer-column">
-                    <h3>Contact Us
+                chatbotMessages.appendChild(botMessageWrapper);
+            } catch (error) {
+                console.error('Error:', error);
+                // Add error message
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'bot-message message';
+                errorMessage.innerHTML = `
+                    <div>Sorry, I encountered an error. Please try again.</div>
+                    <div class="message-time">${currentTime}</div>
+                `;
+                chatbotMessages.appendChild(errorMessage);
+            }
+            
+            // Scroll to bottom
+            chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+        }
+
+        // Event listeners for sending messages
+        sendBtn.addEventListener('click', sendMessage);
+        
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Add this to your existing JavaScript
+        document.querySelectorAll('.quick-reply').forEach(button => {
+            button.addEventListener('click', () => {
+                const message = button.textContent;
+                // Add the message to chat as if user typed it
+                const currentTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                const userMessageElement = document.createElement('div');
+                userMessageElement.className = 'user-message message';
+                userMessageElement.innerHTML = `
+                    <div>${message}</div>
+                    <div class="message-time">${currentTime}</div>
+                `;
+                
+                chatbotMessages.appendChild(userMessageElement);
+                // Trigger the normal message handling
+                handleUserMessage(message);
+            });
+        });
+
+        // Function to handle user messages
+        async function handleUserMessage(message) {
+            const currentTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            // Show typing indicator
+            const typingIndicator = document.createElement('div');
+            typingIndicator.className = 'message-with-avatar';
+            typingIndicator.innerHTML = `
+                <div class="bot-avatar">D</div>
+                <div class="bot-message message">
+                    <div>Typing...</div>
+                </div>
+            `;
+            chatbotMessages.appendChild(typingIndicator);
+            
+            try {
+                // Get response from backend
+                const response = await fetch('http://localhost:5000/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                const data = await response.json();
+                
+                // Remove typing indicator
+                chatbotMessages.removeChild(typingIndicator);
+                
+                // Add bot response
+                const botMessageWrapper = document.createElement('div');
+                botMessageWrapper.className = 'message-with-avatar';
+                botMessageWrapper.innerHTML = `
+                    <div class="bot-avatar">D</div>
+                    <div class="bot-message message">
+                        <div class="message-content">
+                            ${data.response}
+                        </div>
+                        <div class="message-time">${currentTime}</div>
+                    </div>
+                `;
+                
+                chatbotMessages.appendChild(botMessageWrapper);
+            } catch (error) {
+                console.error('Error:', error);
+                chatbotMessages.removeChild(typingIndicator);
+            }
+            
+            // Scroll to bottom
+            chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+        }
+    </script>
+</body>
+</html>
+                
+                
