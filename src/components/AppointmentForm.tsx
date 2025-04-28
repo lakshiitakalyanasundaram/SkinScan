@@ -11,7 +11,7 @@ import {
   CardDescription 
 } from "@/components/ui/card";
 import { toast } from 'sonner';
-import { Calendar } from 'lucide-react';
+import { Calendar, Upload } from 'lucide-react';
 
 const AppointmentForm = () => {
   const handleSubmit = (e: React.FormEvent) => {
@@ -89,9 +89,10 @@ const AppointmentForm = () => {
                   <select 
                     id="doctor" 
                     required 
+                    defaultValue=""
                     className="w-full rounded-md border border-gray-300 py-2 px-3 text-gray-900 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   >
-                    <option value="" disabled selected>Choose a specialist</option>
+                    <option value="" disabled>Choose a specialist</option>
                     <option value="dr-smith">Dr. Smith - General Dermatology</option>
                     <option value="dr-johnson">Dr. Johnson - Pediatric Dermatology</option>
                     <option value="dr-williams">Dr. Williams - Cosmetic Dermatology</option>
@@ -118,9 +119,10 @@ const AppointmentForm = () => {
                   <select 
                     id="time" 
                     required 
+                    defaultValue=""
                     className="w-full rounded-md border border-gray-300 py-2 px-3 text-gray-900 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   >
-                    <option value="" disabled selected>Select time slot</option>
+                    <option value="" disabled>Select time slot</option>
                     <option value="09:00">09:00 AM</option>
                     <option value="10:00">10:00 AM</option>
                     <option value="11:00">11:00 AM</option>
@@ -151,7 +153,7 @@ const AppointmentForm = () => {
                 </label>
                 <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-primary transition-colors">
                   <div className="space-y-1 text-center">
-                    <Image className="mx-auto h-12 w-12 text-gray-400" />
+                    <Upload className="mx-auto h-12 w-12 text-gray-400" />
                     <div className="flex text-sm text-gray-600">
                       <label htmlFor="file-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-primary hover:text-primary-dark focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2">
                         <span>Upload a file</span>
