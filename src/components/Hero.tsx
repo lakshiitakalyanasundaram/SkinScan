@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from 'lucide-react';
@@ -7,7 +6,7 @@ const Hero = () => {
   return (
     <section id="home" className="bg-gradient-to-br from-blue-50 via-blue-100 to-white py-20 md:py-32">
       <div className="container mx-auto px-4 md:px-6 text-center">
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary-dark to-primary">
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-gray-900">
           Advanced Skin Disease Detection
         </h1>
         <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-10">

@@ -1,8 +1,9 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { MessageCircle, X, Minus, Send } from 'lucide-react';
+import { chatWithAI } from '@/lib/api';
+import { toast } from 'sonner';
 
 interface Message {
   id: number;
@@ -16,6 +17,7 @@ const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const messageEndRef = useRef<HTMLDivElement>(null);
   
   const initialMessage: Message = {
@@ -56,8 +58,8 @@ const ChatBot = () => {
     return formatted;
   };
 
-  const handleSendMessage = () => {
-    if (!newMessage.trim()) return;
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || isLoading) return;
     
     // Add user message
     const userMessage: Message = {
@@ -69,52 +71,36 @@ const ChatBot = () => {
     
     setMessages([...messages, userMessage]);
     setNewMessage('');
+    setIsLoading(true);
     
-    // Simulate bot response
-    setTimeout(() => {
-      let botResponse: Message;
+    try {
+      const response = await chatWithAI(newMessage);
       
-      if (newMessage.toLowerCase().includes('rash') || 
-          newMessage.toLowerCase().includes('itchy') || 
-          newMessage.toLowerCase().includes('dermatitis')) {
-        botResponse = {
-          id: messages.length + 2,
-          sender: 'bot',
-          content: `
-            Based on your description, it sounds like you might be experiencing *dermatitis* or a similar inflammatory skin condition.
-            
-            🔍 Common symptoms include redness, itching, and sometimes small blisters.
-            
-            💡 Some quick recommendations:
-            • Keep the area clean and dry
-            • Avoid scratching the affected area
-            • Apply a mild, fragrance-free moisturizer
-            • Take cool baths with colloidal oatmeal
-            
-            ⚠️ If symptoms persist for more than a week or worsen, you should consult with a dermatologist.
-          `,
-          timestamp: new Date(),
-          suggestAppointment: true
-        };
-      } else {
-        botResponse = {
-          id: messages.length + 2,
-          sender: 'bot',
-          content: `
-            Thank you for your message! To provide you with the most accurate information about your skin condition, I'd need a few more details:
-            
-            • How long have you been experiencing this?
-            • Are there any other symptoms like itching, pain or redness?
-            • Have you tried any treatments already?
-            
-            Alternatively, you could upload a photo using our Skin Analysis tool for a more detailed assessment.
-          `,
-          timestamp: new Date()
-        };
-      }
+      const botResponse: Message = {
+        id: messages.length + 2,
+        sender: 'bot',
+        content: response.response,
+        timestamp: new Date(),
+        suggestAppointment: response.suggest_appointment
+      };
       
       setMessages(prev => [...prev, botResponse]);
-    }, 1000);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast.error('Failed to send message. Please try again.');
+      
+      // Add error message
+      const errorMessage: Message = {
+        id: messages.length + 2,
+        sender: 'bot',
+        content: 'Sorry, I encountered an error. Please try again.',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -206,11 +192,13 @@ const ChatBot = () => {
               onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
               placeholder="Type your message..."
               className="flex-1 border rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+              disabled={isLoading}
             />
             <Button 
               onClick={handleSendMessage}
               size="icon" 
               className="rounded-full bg-primary hover:bg-primary-dark"
+              disabled={isLoading}
             >
               <Send className="h-4 w-4" />
             </Button>

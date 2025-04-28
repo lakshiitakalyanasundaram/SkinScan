@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -22,8 +21,12 @@ const Header = () => {
           </div>
           
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="font-medium border-primary text-primary hover:bg-primary hover:text-white">Login</Button>
-            <Button className="font-medium bg-primary hover:bg-primary-dark text-white">Sign Up</Button>
+            <Link to="/login">
+              <Button variant="outline" className="font-medium border-primary text-primary hover:bg-primary hover:text-white">Login</Button>
+            </Link>
+            <Link to="/signup">
+              <Button className="font-medium bg-primary hover:bg-primary-dark text-white">Sign Up</Button>
+            </Link>
           </div>
         </nav>
       </div>

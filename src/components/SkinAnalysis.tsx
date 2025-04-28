@@ -1,33 +1,16 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Upload, Image } from 'lucide-react';
 import { toast } from 'sonner';
+import { uploadImage } from '@/lib/api';
 
 const SkinAnalysis = () => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [showResult, setShowResult] = useState(false);
-  
-  // Mock prediction data for demonstration
-  const predictionResult = {
-    prediction: "Psoriasis",
-    confidence: 0.89,
-    disease_data: {
-      description: "Psoriasis is a skin disorder that causes skin cells to multiply up to 10 times faster than normal. This makes the skin build up into bumpy red patches covered with white scales.",
-      causes: "Psoriasis occurs when skin cells are replaced more quickly than usual. The cause isn't fully understood, but it's thought to be related to an immune system problem with T cells and other white blood cells in the body.",
-      prevention: [
-        "Moisturize regularly to keep skin hydrated",
-        "Avoid skin injuries such as cuts, scrapes, and insect bites",
-        "Manage stress through meditation or exercise",
-        "Limit alcohol consumption and avoid smoking",
-        "Protect your skin from excessive sun exposure"
-      ],
-      treatment: "Treatment options include topical creams (corticosteroids), light therapy, and systemic medications. For mild cases, regular moisturizing and lifestyle changes may help manage symptoms."
-    }
-  };
+  const [predictionResult, setPredictionResult] = useState<any>(null);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -69,15 +52,21 @@ const SkinAnalysis = () => {
     }
   };
 
-  const handleAnalyze = () => {
-    setAnalyzing(true);
+  const handleAnalyze = async () => {
+    if (!selectedImage) return;
     
-    // Simulate API call with setTimeout
-    setTimeout(() => {
-      setAnalyzing(false);
+    setAnalyzing(true);
+    try {
+      const result = await uploadImage(selectedImage);
+      setPredictionResult(result);
       setShowResult(true);
       toast.success("Analysis completed successfully!");
-    }, 2000);
+    } catch (error) {
+      console.error('Error analyzing image:', error);
+      toast.error("Failed to analyze image. Please try again.");
+    } finally {
+      setAnalyzing(false);
+    }
   };
 
   return (
@@ -144,7 +133,7 @@ const SkinAnalysis = () => {
                   <p className="text-lg font-medium">Results will appear here</p>
                   <p className="text-sm">Upload and analyze an image to see the prediction</p>
                 </div>
-              ) : (
+              ) : predictionResult && (
                 <div className="animate-fade-in">
                   <h3 className="text-2xl font-bold mb-4 text-primary">Prediction Result</h3>
                   
@@ -181,7 +170,7 @@ const SkinAnalysis = () => {
                         <span className="bg-blue-100 rounded-full p-1 mr-2">🛡️</span> Prevention
                       </h4>
                       <ul className="text-gray-700 space-y-2">
-                        {predictionResult.disease_data.prevention.map((item, index) => (
+                        {predictionResult.disease_data.prevention.map((item: string, index: number) => (
                           <li key={index} className="flex items-start">
                             <span className="text-primary mr-2">•</span>
                             <span>{item}</span>
