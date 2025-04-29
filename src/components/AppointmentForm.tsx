@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,10 +11,63 @@ import {
 } from "@/components/ui/card";
 import { toast } from 'sonner';
 import { Calendar, Upload } from 'lucide-react';
+import { uploadImageAndGetUrl } from "@/lib/imageUpload";
 
 const AppointmentForm = () => {
-  const handleSubmit = (e: React.FormEvent) => {
+  // State for each field
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [doctor, setDoctor] = useState('');
+  const [doctorName, setDoctorName] = useState('');
+  const [date, setDate] = useState('');
+  const [time, setTime] = useState('');
+  const [symptoms, setSymptoms] = useState('');
+  const [image, setImage] = useState<File | null>(null);
+
+  // Map doctor value to name
+  const doctorOptions: Record<string, string> = {
+    "dr-smith": "Dr. Smith",
+    "dr-johnson": "Dr. Johnson",
+    "dr-williams": "Dr. Williams",
+    "dr-brown": "Dr. Brown"
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    let imageUrl = '';
+    if (image) {
+      try {
+        imageUrl = await uploadImageAndGetUrl(image);
+      } catch (err) {
+        // Optionally handle upload error
+        // toast.error("Image upload failed");
+      }
+    }
+
+    const formData: any = {
+      full_name: fullName,
+      email,
+      phone_number: phone,
+      doctor_id: doctor,
+      doctor_name: doctorOptions[doctor] || '',
+      preferred_date: date,
+      preferred_time: time,
+      symptoms,
+      image_url: imageUrl,
+    };
+
+    try {
+      await fetch('http://localhost:5000/api/appointments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+    } catch (err) {
+      // Optionally log error
+    }
+
     toast.success("Appointment request submitted successfully!", {
       description: "We'll contact you shortly to confirm your appointment."
     });
@@ -51,6 +103,8 @@ const AppointmentForm = () => {
                     placeholder="Enter your full name" 
                     required 
                     className="border-gray-300 focus:border-primary focus:ring-primary"
+                    value={fullName}
+                    onChange={e => setFullName(e.target.value)}
                   />
                 </div>
                 
@@ -64,6 +118,8 @@ const AppointmentForm = () => {
                     placeholder="Enter your email" 
                     required 
                     className="border-gray-300 focus:border-primary focus:ring-primary"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
                   />
                 </div>
                 
@@ -77,6 +133,8 @@ const AppointmentForm = () => {
                     placeholder="Enter your phone number" 
                     required 
                     className="border-gray-300 focus:border-primary focus:ring-primary"
+                    value={phone}
+                    onChange={e => setPhone(e.target.value)}
                   />
                 </div>
               </div>
@@ -89,7 +147,8 @@ const AppointmentForm = () => {
                   <select 
                     id="doctor" 
                     required 
-                    defaultValue=""
+                    value={doctor}
+                    onChange={e => setDoctor(e.target.value)}
                     className="w-full rounded-md border border-gray-300 py-2 px-3 text-gray-900 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     <option value="" disabled>Choose a specialist</option>
@@ -109,6 +168,8 @@ const AppointmentForm = () => {
                     type="date" 
                     required 
                     className="border-gray-300 focus:border-primary focus:ring-primary"
+                    value={date}
+                    onChange={e => setDate(e.target.value)}
                   />
                 </div>
                 
@@ -119,7 +180,8 @@ const AppointmentForm = () => {
                   <select 
                     id="time" 
                     required 
-                    defaultValue=""
+                    value={time}
+                    onChange={e => setTime(e.target.value)}
                     className="w-full rounded-md border border-gray-300 py-2 px-3 text-gray-900 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     <option value="" disabled>Select time slot</option>
@@ -144,6 +206,8 @@ const AppointmentForm = () => {
                   placeholder="Please describe your skin condition and symptoms" 
                   rows={4}
                   className="border-gray-300 focus:border-primary focus:ring-primary resize-none"
+                  value={symptoms}
+                  onChange={e => setSymptoms(e.target.value)}
                 />
               </div>
               
@@ -157,7 +221,18 @@ const AppointmentForm = () => {
                     <div className="flex text-sm text-gray-600">
                       <label htmlFor="file-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-primary hover:text-primary-dark focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2">
                         <span>Upload a file</span>
-                        <input id="file-upload" name="file-upload" type="file" className="sr-only" accept="image/*" />
+                        <input
+                          id="file-upload"
+                          name="file-upload"
+                          type="file"
+                          className="sr-only"
+                          accept="image/*"
+                          onChange={e => {
+                            if (e.target.files && e.target.files[0]) {
+                              setImage(e.target.files[0]);
+                            }
+                          }}
+                        />
                       </label>
                       <p className="pl-1">or drag and drop</p>
                     </div>

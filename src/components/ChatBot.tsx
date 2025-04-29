@@ -4,6 +4,8 @@ import { Card } from "@/components/ui/card";
 import { MessageCircle, X, Minus, Send } from 'lucide-react';
 import { chatWithAI } from '@/lib/api';
 import { toast } from 'sonner';
+import { supabase } from '@/lib/supabase';
+import type { ChatMessage } from '@/lib/supabase';
 
 interface Message {
   id: number;
@@ -18,6 +20,7 @@ const ChatBot = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
   const messageEndRef = useRef<HTMLDivElement>(null);
   
   const initialMessage: Message = {
@@ -36,6 +39,51 @@ const ChatBot = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    // Get current user ID
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserId(user?.id || null);
+    };
+    getUser();
+  }, []);
+
+  useEffect(() => {
+    if (isOpen && userId) {
+      // Subscribe to new chat messages
+      const subscription = supabase
+        .channel('chat_messages')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'chat_messages',
+          },
+          (payload) => {
+            const newMessage = payload.new as ChatMessage;
+            if (newMessage.user_id === userId) {
+              setMessages(prev => [
+                ...prev,
+                {
+                  id: prev.length + 1,
+                  sender: 'bot',
+                  content: newMessage.response,
+                  timestamp: new Date(newMessage.created_at),
+                  suggestAppointment: newMessage.suggest_appointment
+                }
+              ]);
+            }
+          }
+        )
+        .subscribe();
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    }
+  }, [isOpen, userId]);
 
   const scrollToBottom = () => {
     messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });

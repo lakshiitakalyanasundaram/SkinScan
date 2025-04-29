@@ -12,6 +12,7 @@ const Signup = () => {
     confirm_password: ''
   });
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,6 +26,7 @@ const Signup = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
 
     if (formData.password !== formData.confirm_password) {
       setError('Passwords do not match');
@@ -33,17 +35,23 @@ const Signup = () => {
 
     try {
       const { confirm_password, ...signupData } = formData;
-      await signup(
+      const response = await signup(
         signupData.email,
         signupData.password,
         signupData.first_name,
         signupData.last_name
       );
-      toast.success('Account created successfully!');
-      navigate('/login');
+      
+      setSuccess(response.message);
+      toast.success(response.message);
+      
+      // Don't navigate immediately, let the user see the success message
+      setTimeout(() => {
+        navigate('/login');
+      }, 3000);
     } catch (error: any) {
-      setError(error.response?.data?.error || 'Sign up failed. Please try again.');
-      toast.error('Sign up failed. Please try again.');
+      setError(error.message || 'Sign up failed. Please try again.');
+      toast.error(error.message || 'Sign up failed. Please try again.');
     }
   };
 
@@ -65,6 +73,12 @@ const Signup = () => {
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded relative" role="alert">
             <span className="block sm:inline">{error}</span>
+          </div>
+        )}
+
+        {success && (
+          <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded relative" role="alert">
+            <span className="block sm:inline">{success}</span>
           </div>
         )}
 

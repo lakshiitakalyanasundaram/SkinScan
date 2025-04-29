@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, jsonify, redirect, url_for, session, send_from_directory
+from flask import Flask, request, render_template, jsonify, redirect, url_for, session
 from flask_cors import CORS
 import tensorflow as tf
 from tensorflow.keras.models import load_model
@@ -9,31 +9,22 @@ import os
 import google.generativeai as genai
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
-import smtplib
-from email.mime.text import MIMEText
-from supabase import create_client, Client
 
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
-app = Flask(__name__, static_folder='../dist', static_url_path='')
-app.secret_key = 'AIzaSyASEUOtFmvU-amhrCskFgAk10S7g8cTJFI'  # Change this to a secure secret key
+app = Flask(__name__)
+app.secret_key = 'your-secret-key-here'  # Change this to a secure secret key
 CORS(app)
 
 # Simulated database (replace with actual database in production)
 users = {}
 
-# Serve frontend files
-@app.route('/')
-def serve_frontend():
-    return send_from_directory(app.static_folder, 'index.html')
-
-@app.route('/<path:path>')
-def serve_static(path):
-    return send_from_directory(app.static_folder, path)
-
-# API routes
-@app.route('/api/login', methods=['POST'])
+# Login route
+@app.route('/login', methods=['GET', 'POST'])
 def login():
+    if request.method == 'GET':
+        return render_template('login.html')
+    
     data = request.json
     email = data.get('email')
     password = data.get('password')
@@ -48,8 +39,12 @@ def login():
     
     return jsonify({'error': 'Invalid email or password'}), 401
 
-@app.route('/api/signup', methods=['POST'])
+# Signup route
+@app.route('/signup', methods=['GET', 'POST'])
 def signup():
+    if request.method == 'GET':
+        return render_template('signup.html')
+    
     data = request.json
     email = data.get('email')
     password = data.get('password')
@@ -72,17 +67,18 @@ def signup():
     
     return jsonify({'message': 'Signup successful'})
 
-@app.route('/api/logout')
+# Logout route
+@app.route('/logout')
 def logout():
     session.pop('user_email', None)
-    return jsonify({'message': 'Logout successful'})
+    return redirect(url_for('index'))
 
 # Protect routes that require authentication
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_email' not in session:
-            return jsonify({'error': 'Authentication required'}), 401
+            return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -129,10 +125,12 @@ Format your responses like this:
 🏥 [SUGGEST_APPOINTMENT] (only include this if professional consultation is recommended)"""
 
 # Load the skin disease prediction model
-model = load_model("/Users/lakshiitakalyanasundaram/skin-insight-ai/backend/skin_disease_model.h5")
+model = load_model("skin_disease_model.h5")
+
 
 #Defining the classes
-class_names = ["Cellulitis", "Impetigo", "Athelete-Foot", "Nail-Fungus", "Ringworm","Cutaneous-larva-migrans","Chickenpox", "Shingles"]
+
+class_names  =["Cellulitis", "Impetigo", "Athelete-Foot", "Nail-Fungus", "Ringworm","Cutaneous-larva-migrans","Chickenpox", "Shingles"]
 
 # Disease information dictionary
 disease_info = {
@@ -226,6 +224,7 @@ disease_info = {
     }
 }
 
+
 #Preparing the image before feeding it to the model
 def preprocess_image(img, target_size):
     img = img.convert("RGB")  # <-- Add this line to ensure 3 channels
@@ -235,36 +234,47 @@ def preprocess_image(img, target_size):
     img = img / 255.0
     return img
 
-#Defining the routes
-@app.route("/api/analyze", methods=["POST"])
-def predict():
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file uploaded'}), 400
-        
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'error': 'No file selected'}), 400
-        
-    try:
-        image = Image.open(file.stream)
-        image = preprocess_image(image, target_size=(150,150))
-        prediction = model.predict(image)
-        predicted_class = class_names[np.argmax(prediction)]
-        confidence = float(np.max(prediction))
-        
-        # Get disease information
-        disease_data = disease_info.get(predicted_class, {})
-        
-        return jsonify({
-            'prediction': predicted_class,
-            'confidence': confidence,
-            'disease_data': disease_data
-        })
-    except Exception as e:
-        print(f"Error: {str(e)}")
-        return jsonify({'error': str(e)}), 500
 
-@app.route('/api/chat', methods=['POST'])
+
+#Defining the routes
+@app.route("/", methods=["GET", "POST"])
+def predict():
+    if request.method == "POST":
+        if 'file' not in request.files:
+            return render_template("index.html", error="No file uploaded")
+            
+        file = request.files['file']
+        if file.filename == '':
+            return render_template("index.html", error="No file selected")
+            
+        try:
+            image = Image.open(file.stream)
+            image = preprocess_image(image, target_size=(150,150))
+            prediction = model.predict(image)
+            predicted_class = class_names[np.argmax(prediction)]
+            confidence = float(np.max(prediction))
+            
+            # Get disease information
+            disease_data = disease_info.get(predicted_class, {})
+            
+            # Debug print
+            print(f"Predicted class: {predicted_class}")
+            print(f"Confidence: {confidence}")
+            print(f"Disease data: {disease_data}")
+            
+            return render_template("index.html", 
+                                prediction=predicted_class,
+                                confidence=confidence,
+                                show_result=True,
+                                disease_data=disease_data)
+        except Exception as e:
+            print(f"Error: {str(e)}")
+            return render_template("index.html", error=str(e))
+    
+    return render_template("index.html")
+    
+
+@app.route('/chat', methods=['POST'])
 def chat_endpoint():
     try:
         data = request.json
@@ -295,57 +305,6 @@ def chat_endpoint():
         return jsonify({
             'error': 'An error occurred while processing your request'
         }), 500
-
-def send_appointment_email(to_email, full_name, date, time, doctor):
-    subject = "Your DermaScan Appointment is Confirmed"
-    body = f"""
-    Hi {full_name},
-
-    Your appointment with {doctor} has been confirmed for {date} at {time}.
-
-    Thank you for booking with DermaScan!
-    """
-    msg = MIMEText(body)
-    msg['Subject'] = subject
-    msg['From'] = "skinscan3014@gmail.com"
-    msg['To'] = to_email
-
-    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
-        server.login("skinscan3014@gmail.com", "hcjg ujzq wuik sats")
-        server.sendmail(msg['From'], [msg['To']], msg.as_string())
-
-@app.route('/api/appointments', methods=['POST'])
-def create_appointment():
-    data = request.json
-    url = "https://xsbblkptiyvvdchcqvbm.supabase.co"
-    key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhzYmJsa3B0aXl2dmRjaGNxdmJtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NTg2NTAwOCwiZXhwIjoyMDYxNDQxMDA4fQ.iPvilEAJ3skpl0YfbH56n3KvGLucomEJI7-PWLUzhNU"
-    supabase: Client = create_client(url, key)
-    try:
-        result = supabase.table('appointments').insert({
-            'full_name': data['full_name'],
-            'email': data['email'],
-            'phone_number': data['phone_number'],
-            'doctor_id': data.get('doctor_id'),
-            'doctor_name': data['doctor_name'],
-            'preferred_date': data['preferred_date'],
-            'preferred_time': data['preferred_time'],
-            'symptoms': data['symptoms'],
-            'image_url': data.get('image_url'),
-            'status': 'pending'
-        }).execute()
-        if result.data and len(result.data) > 0:
-            appointment = result.data[0]
-            send_appointment_email(
-                to_email=appointment['email'],
-                full_name=appointment['full_name'],
-                date=appointment['preferred_date'],
-                time=appointment['preferred_time'],
-                doctor=appointment['doctor_name']
-            )
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-    return jsonify({'message': 'Appointment booked and email sent!'})
 
 if __name__ == "__main__":
     app.run(debug=True)

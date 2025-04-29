@@ -18,8 +18,8 @@ const Login = () => {
       toast.success('Login successful!');
       navigate('/');
     } catch (error: any) {
-      setError(error.response?.data?.error || 'Login failed. Please try again.');
-      toast.error('Login failed. Please try again.');
+      setError(error.message || 'Login failed. Please try again.');
+      toast.error(error.message || 'Login failed. Please try again.');
     }
   };
 
